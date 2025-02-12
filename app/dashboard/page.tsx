@@ -15,6 +15,7 @@ import {
   Zap,
   Palette,
   Brain,
+  Bell,
 } from "lucide-react"
 import { useTheme } from "next-themes"
 
@@ -122,49 +123,99 @@ export default function DashboardPage() {
   )
 }
 
-interface DashboardLayoutProps {
-  children: React.ReactNode
-}
-
-function DashboardLayout({
-  children
-}) {
+function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isCollapsed, setIsCollapsed] = React.useState(false)
-  const { setTheme, theme } = useTheme()
-  const [recentItems, setRecentItems] = React.useState([])
+  // const { setTheme, theme } = useTheme()
+  const [recentItems, setRecentItems] = React.useState<RecentItem[]>([])
+  const [notifications, setNotifications] = React.useState<number>(3) // New state for notifications
 
-  const addRecentItem = (item) => {
-    // Check if the item already exists in recentItems
-    const itemExists = recentItems.some(recentItem => recentItem.label === item.label);
-
-    // If it doesn't exist, add it
+  const addRecentItem = (item: QuickAccessItem) => {
+    const itemExists = recentItems.some((recentItem) => recentItem.label === item.label)
     if (!itemExists) {
-      const newRecentItem = {
+      const newRecentItem: RecentItem = {
         icon: item.icon,
-        label: item.label, // Remove "Accessed" prefix
+        label: item.label,
         timestamp: new Date(),
       }
-      setRecentItems((prevItems) => [newRecentItem, ...prevItems.slice(0, 2)]);
+      setRecentItems((prevItems) => [newRecentItem, ...prevItems.slice(0, 2)])
     }
   }
 
   return (
-    (<div
-      className="flex h-screen bg-background transition-colors duration-300 ease-in-out">
+    <div className="flex h-screen bg-background transition-colors duration-300 ease-in-out">
       <Sidebar
         isCollapsed={isCollapsed}
         setIsCollapsed={setIsCollapsed}
         recentItems={recentItems}
-        addRecentItem={addRecentItem} />
-      <main className="flex-1 overflow-y-auto p-8">
-        <nav className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <ModeToggle />
-        </nav>
-        {children}
+        addRecentItem={addRecentItem}
+      />
+      <main className="flex-1 overflow-y-auto">
+        <Header notifications={notifications} setNotifications={setNotifications} />
+        <div className="p-8">{children}</div>
       </main>
-    </div>)
-  );
+    </div>
+  )
+}
+
+function Header({
+  notifications,
+  setNotifications,
+}: {
+  notifications: number
+  setNotifications: React.Dispatch<React.SetStateAction<number>>
+}) {
+  return (
+    <header className="sticky top-0 z-10 bg-background border-b p-4 flex items-center justify-between">
+      <h1 className="text-2xl font-bold">Dashboard</h1>
+      <div className="flex items-center space-x-4">
+        <NotificationBell count={notifications} onClick={() => setNotifications(0)} />
+        <ModeToggle />
+        <UserMenu />
+      </div>
+    </header>
+  )
+}
+
+function NotificationBell({ count, onClick }: { count: number; onClick: () => void }) {
+  return (
+    <Button variant="ghost" size="icon" onClick={onClick} className="relative">
+      <Bell className="h-5 w-5" />
+      {count > 0 && (
+        <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+          {count}
+        </span>
+      )}
+    </Button>
+  )
+}
+
+function UserMenu() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src="/avatars/01.png" alt="@shadcn" />
+            <AvatarFallback>SC</AvatarFallback>
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56" align="end" forceMount>
+        <DropdownMenuItem>
+          <Users className="mr-2 h-4 w-4" />
+          <span>Profile</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <CreditCard className="mr-2 h-4 w-4" />
+          <span>Billing</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Log out</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
 }
 
 interface QuickAccessItem {
@@ -176,14 +227,17 @@ interface RecentItem extends QuickAccessItem {
   timestamp: Date
 }
 
-interface SidebarProps {
+function Sidebar({
+  isCollapsed,
+  setIsCollapsed,
+  recentItems,
+  addRecentItem,
+}: {
   isCollapsed: boolean
   setIsCollapsed: (value: boolean) => void
   recentItems: RecentItem[]
   addRecentItem: (item: QuickAccessItem) => void
-}
-
-function Sidebar({ isCollapsed, setIsCollapsed, recentItems, addRecentItem }: SidebarProps) {
+}) {
   return (
     <aside
       className={cn(
@@ -209,11 +263,7 @@ function Sidebar({ isCollapsed, setIsCollapsed, recentItems, addRecentItem }: Si
   )
 }
 
-interface ProfileSectionProps {
-  isCollapsed: boolean
-}
-
-function ProfileSection({ isCollapsed }: ProfileSectionProps) {
+function ProfileSection({ isCollapsed }: { isCollapsed: boolean }) {
   return (
     <div className="p-4">
       <div className="flex items-center space-x-4 mb-4">
@@ -242,12 +292,10 @@ function ProfileSection({ isCollapsed }: ProfileSectionProps) {
   )
 }
 
-interface QuickAccessMenuProps {
-  isCollapsed: boolean
-  addRecentItem: (item: QuickAccessItem) => void
-}
-
-function QuickAccessMenu({ isCollapsed, addRecentItem }: QuickAccessMenuProps) {
+function QuickAccessMenu({
+  isCollapsed,
+  addRecentItem,
+}: { isCollapsed: boolean; addRecentItem: (item: QuickAccessItem) => void }) {
   const menuItems: QuickAccessItem[] = [
     { icon: Brain, label: "Artificial Intelligence" },
     { icon: Palette, label: "Designer" },
@@ -286,12 +334,7 @@ function QuickAccessMenu({ isCollapsed, addRecentItem }: QuickAccessMenuProps) {
   )
 }
 
-interface RecentsSectionProps {
-  isCollapsed: boolean
-  recentItems: RecentItem[]
-}
-
-function RecentsSection({ isCollapsed, recentItems }: RecentsSectionProps) {
+function RecentsSection({ isCollapsed, recentItems }: { isCollapsed: boolean; recentItems: RecentItem[] }) {
   return (
     <div className="p-4">
       <h3 className={cn("font-semibold mb-2", isCollapsed && "sr-only")}>Recents</h3>
@@ -324,11 +367,7 @@ function RecentsSection({ isCollapsed, recentItems }: RecentsSectionProps) {
   )
 }
 
-interface SyncStatusProps {
-  isCollapsed: boolean
-}
-
-function SyncStatus({ isCollapsed }: SyncStatusProps) {
+function SyncStatus({ isCollapsed }: { isCollapsed: boolean }) {
   return (
     <div className="p-4">
       <h3 className={cn("font-semibold mb-2", isCollapsed && "sr-only")}>Sync Status</h3>
@@ -347,7 +386,7 @@ function SyncStatus({ isCollapsed }: SyncStatusProps) {
 }
 
 function ModeToggle() {
-  const { setTheme, theme } = useTheme()
+  const { setTheme } = useTheme()
 
   return (
     <DropdownMenu>

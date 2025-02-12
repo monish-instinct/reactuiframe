@@ -1,5 +1,4 @@
 import { LoginForm } from "../components/login-form"
-// import DashboardPage from "./dashboard/page"
 
 export default function LoginPage() {
   return (
