@@ -2,8 +2,6 @@
 
 import * as React from "react"
 import {
-  Moon,
-  Sun,
   Users,
   Search,
   LogOut,
@@ -16,11 +14,11 @@ import {
   Palette,
   Brain,
 } from "lucide-react"
-import { useTheme } from "next-themes"
+// import { useTheme } from "next-themes"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+// import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -126,7 +124,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isCollapsed, setIsCollapsed] = React.useState(false)
   // const { setTheme, theme } = useTheme()
   const [recentItems, setRecentItems] = React.useState<RecentItem[]>([])
-  const [_notifications, _setNotifications] = React.useState<number>(3) // New state for notifications
+  // const [_notifications, _setNotifications] = React.useState<number>(3) // New state for notifications
 
   const addRecentItem = (item: QuickAccessItem) => {
     const itemExists = recentItems.some((recentItem) => recentItem.label === item.label)
