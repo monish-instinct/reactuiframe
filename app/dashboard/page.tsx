@@ -15,10 +15,9 @@ import {
   Zap,
   Palette,
   Brain,
-  Bell,
 } from "lucide-react"
 import { useTheme } from "next-themes"
-
+import { ThemeToggle } from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -125,7 +124,7 @@ export default function DashboardPage() {
 
 function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isCollapsed, setIsCollapsed] = React.useState(false)
-  // const { setTheme, theme } = useTheme()
+  const { setTheme, theme } = useTheme()
   const [recentItems, setRecentItems] = React.useState<RecentItem[]>([])
   const [notifications, setNotifications] = React.useState<number>(3) // New state for notifications
 
@@ -149,72 +148,15 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
         recentItems={recentItems}
         addRecentItem={addRecentItem}
       />
-      <main className="flex-1 overflow-y-auto">
-        <Header notifications={notifications} setNotifications={setNotifications} />
-        <div className="p-8">{children}</div>
+      <main className="flex-1 overflow-y-auto p-8">
+        <nav className="flex items-center justify-between mb-8">
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+          {/* <ModeToggle /> */}
+          <ThemeToggle/>
+        </nav>
+        {children}
       </main>
     </div>
-  )
-}
-
-function Header({
-  notifications,
-  setNotifications,
-}: {
-  notifications: number
-  setNotifications: React.Dispatch<React.SetStateAction<number>>
-}) {
-  return (
-    <header className="sticky top-0 z-10 bg-background border-b p-4 flex items-center justify-between">
-      <h1 className="text-2xl font-bold">Dashboard</h1>
-      <div className="flex items-center space-x-4">
-        <NotificationBell count={notifications} onClick={() => setNotifications(0)} />
-        <ModeToggle />
-        <UserMenu />
-      </div>
-    </header>
-  )
-}
-
-function NotificationBell({ count, onClick }: { count: number; onClick: () => void }) {
-  return (
-    <Button variant="ghost" size="icon" onClick={onClick} className="relative">
-      <Bell className="h-5 w-5" />
-      {count > 0 && (
-        <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
-          {count}
-        </span>
-      )}
-    </Button>
-  )
-}
-
-function UserMenu() {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src="/avatars/01.png" alt="@shadcn" />
-            <AvatarFallback>SC</AvatarFallback>
-          </Avatar>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
-        <DropdownMenuItem>
-          <Users className="mr-2 h-4 w-4" />
-          <span>Profile</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <CreditCard className="mr-2 h-4 w-4" />
-          <span>Billing</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
   )
 }
 
@@ -385,8 +327,26 @@ function SyncStatus({ isCollapsed }: { isCollapsed: boolean }) {
   )
 }
 
+function Header({
+  notifications,
+  setNotifications,
+}: {
+  notifications: number
+  setNotifications: React.Dispatch<React.SetStateAction<number>>
+}) {
+  return (
+    <header className="sticky top-0 z-10 bg-background border-b p-4 flex items-center justify-between">
+      <h1 className="text-2xl font-bold">Dashboard</h1>
+      <div className="flex items-center space-x-4">
+        {/* <ModeToggle /> */}
+        <ThemeToggle />
+      </div>
+    </header>
+  )
+}
+
 function ModeToggle() {
-  const { setTheme } = useTheme()
+  const { setTheme, theme } = useTheme()
 
   return (
     <DropdownMenu>
